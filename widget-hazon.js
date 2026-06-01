@@ -632,7 +632,7 @@
                     <!-- Persistent header (all steps) -->
                     <div id="q-header-provador">
                         <h1>Provador Virtual</h1>
-                        <img src="https://acdn-us.mitiendanube.com/stores/003/993/051/themes/common/logo-6631277712869130838-1776197600-44aaa157a4b44fbc5015d2c66f679a641776197600.png" alt="HAZON" style="height:48px;width:auto;"/>
+                        <img src="https://dcdn-us.mitiendanube.com/stores/003/993/051/themes/common/logo-6631277712869130838-1776197600-44aaa157a4b44fbc5015d2c66f679a641776197600-640-0.webp" alt="HAZON" style="height:48px;width:auto;"/>
                     </div>
 
                     <!-- Main step -->
