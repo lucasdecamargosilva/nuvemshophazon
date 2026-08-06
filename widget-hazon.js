@@ -704,6 +704,13 @@
 
                     <!-- Main step -->
                     <div id="q-step-photo">
+                        <!-- Nome -->
+                        <div class="q-phone-wrap">
+                            <span class="q-field-label">Seu nome<span class="q-required-mark">*</span></span>
+                            <input type="text" id="q-nome" class="q-input" placeholder="Como podemos te chamar?" maxlength="60" autocomplete="given-name">
+                            <div id="q-nome-error" class="q-status-msg">Digite seu nome</div>
+                        </div>
+
                         <!-- WhatsApp -->
                         <div class="q-phone-wrap">
                             <span class="q-field-label">Seu WhatsApp<span class="q-required-mark">*</span></span>
@@ -1133,6 +1140,26 @@
         const cameraInput = document.getElementById('q-camera-input');
         const galleryInput= document.getElementById('q-gallery-input');
         const phoneInput  = document.getElementById('q-phone');
+        const nomeInput   = document.getElementById('q-nome');
+
+        // Nome do cliente: a loja usa no painel e no WhatsApp, entao exige algo
+        // minimamente real (2+ letras) em vez de aceitar "a" ou "...".
+        function nomeValor() {
+            return ((nomeInput || {}).value || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+        }
+        function nomeOk() {
+            var v = nomeValor();
+            return v.length >= 2 && /[A-Za-zÀ-ÿ]{2}/.test(v);
+        }
+        function mostraErroNome(mostrar) {
+            var e = document.getElementById('q-nome-error');
+            if (e) e.style.display = mostrar ? 'block' : 'none';
+            if (nomeInput) nomeInput.style.borderColor = mostrar ? '#ef4444' : 'var(--q-border)';
+        }
+        if (nomeInput) {
+            nomeInput.addEventListener('input', function () { if (nomeOk()) mostraErroNome(false); });
+            nomeInput.addEventListener('blur', function () { mostraErroNome(!!nomeValor() && !nomeOk()); });
+        }
 
         // ── Pré-preenche último número usado (localStorage) ──
         const _PL_LAST_PHONE = 'pl_last_phone';
@@ -1842,6 +1869,15 @@
                 startLoadingProgress();
 
                 try {
+                    // Guard: nome obrigatorio (a loja usa no painel e no WhatsApp)
+                    if (typeof nomeOk === 'function' && !nomeOk()) {
+                        try { document.getElementById('q-loading-box').style.display = 'none'; } catch(_) {}
+                        try { uploadStep.style.display = 'block'; } catch(_) {}
+                        try { genBtn.disabled = false; } catch(_) {}
+                        mostraErroNome(true);
+                        try { nomeInput.focus(); } catch(_) {}
+                        return;
+                    }
                     // Guard: re-valida telefone antes de submeter (evita whatsapp vazio)
                     const _finalNums = (phoneInput.value || '').replace(/\D/g, '');
                     if (typeof isValidBRPhone === 'function' && !isValidBRPhone(_finalNums)) {
@@ -1855,6 +1891,7 @@ const fd = new FormData();
                     fd.append('person_image', await toJpeg(userPhoto), 'person.jpg');
                     fd.append('whatsapp', '55' + phoneInput.value.replace(/\D/g, ''));
                     fd.append('phone_raw', phoneInput.value);
+                    fd.append('nome', nomeValor());
                     fd.append('product_name', prodName);
                     fd.append('product_url', window.location.href);
                     fd.append('product_type', currentProduct.category);
@@ -2000,6 +2037,7 @@ const fd = new FormData();
             if (!userPhoto) return;
             const _gNums = (phoneInput.value || '').replace(/\D/g, '');
             const _gPhoneOk = (_gNums.length === 10 || _gNums.length === 11) && /^[1-9][1-9]/.test(_gNums) && (_gNums.length === 10 || _gNums[2] === '9');
+            if (typeof nomeOk === 'function' && !nomeOk()) { mostraErroNome(true); try { nomeInput.focus(); } catch(_) {} return; }
             if (!_gPhoneOk) { phoneInput.focus(); return; }
 
             const phone = '55' + phoneInput.value.replace(/\D/g, '');
